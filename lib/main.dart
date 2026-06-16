@@ -9,10 +9,10 @@ import 'screens/ai_chat_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await dotenv.load(fileName: ".env");
   runApp(
     const ProviderScope(
       child: GenericTemplateApp(),

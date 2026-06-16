@@ -21,21 +21,37 @@ Jika teman-teman baru saja melakukan clone repository `flutter-genui-sdk-firebas
    ```bash
    cp .env.example .env
    ```
-   Buka file `.env` baru tersebut, lalu isi dengan API Key Gemini milikmu (dapatkan di [Google AI Studio](https://aistudio.google.com/)):
+   Buka file `.env` baru tersebut, lalu isi dengan API Key Gemini milikmu (dapatkan di [Google AI Studio](https://aistudio.google.com/)) dan detail project Firebase milikmu (bisa didapatkan di Firebase Console bagian Project Settings):
    ```env
    GEMINI_API_KEY=AIzaSy...
+   
+   # Firebase Config (General)
+   FIREBASE_PROJECT_ID=your_project_id
+   FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   FIREBASE_STORAGE_BUCKET=your_storage_bucket
+   
+   # Firebase Web Config
+   FIREBASE_API_KEY_WEB=your_web_api_key
+   FIREBASE_APP_ID_WEB=your_web_app_id
+   FIREBASE_AUTH_DOMAIN=your_auth_domain
+   
+   # Firebase Android Config
+   FIREBASE_API_KEY_ANDROID=your_android_api_key
+   FIREBASE_APP_ID_ANDROID=your_android_app_id
+   
+   # Firebase iOS Config
+   FIREBASE_API_KEY_IOS=your_ios_api_key
+   FIREBASE_APP_ID_IOS=your_ios_app_id
+   FIREBASE_IOS_BUNDLE_ID=your_bundle_id
    ```
-3. **Sambungkan dengan Firebase (Inisialisasi)**:
+
+3. **Sambungkan Database Firestore & Seed Data**:
    Aplikasi ini memerlukan Firebase Firestore. Pastikan Firebase CLI terinstall di laptop masing-masing (`npm install -g firebase-tools`).
    Lakukan login:
    ```bash
    firebase login
    ```
-   Hubungkan project Flutter ini dengan project Firebase-mu:
-   ```bash
-   flutterfire configure
-   ```
-   *(Pilih project Firebase yang sudah ada, atau buat project baru via CLI ini. Ini akan memperbarui file `lib/firebase_options.dart` secara otomatis).*
+   *(Pilih project Firebase yang sudah ada, atau buat project baru via Firebase Console. Berkas `lib/firebase_options.dart` bawaan template ini sudah terkonfigurasi secara dinamis untuk membaca data dari file `.env` Anda).*
 
 4. **Jalankan Aplikasi & Seed Data**:
    Jalankan aplikasi di Emulator/Simulator/Web:
