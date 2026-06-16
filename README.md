@@ -22,6 +22,9 @@ Jika teman-teman baru saja melakukan clone repository `flutter-genui-sdk-firebas
    cp .env.example .env
    ```
    Buka file `.env` baru tersebut, lalu isi dengan API Key Gemini milikmu (dapatkan di [Google AI Studio](https://aistudio.google.com/)) dan detail project Firebase milikmu (bisa didapatkan di Firebase Console bagian Project Settings):
+   
+   ![Google AI Studio API Key](https://asset.cloudinary.com/amirushared/1950a70295a1dbbd81036b7e3580bc0a)
+
    ```env
    GEMINI_API_KEY=AIzaSy...
    
@@ -59,6 +62,8 @@ Jika teman-teman baru saja melakukan clone repository `flutter-genui-sdk-firebas
    ```bash
    firebase login
    ```
+   ![Firebase Login Terminal](https://asset.cloudinary.com/amirushared/3b10a5d0b602e73f09dc5c690bd3d1f3)
+
    Hubungkan project lokal ini dengan project ID Firebase yang Anda miliki:
    ```bash
    firebase use --add
@@ -69,20 +74,30 @@ Jika teman-teman baru saja melakukan clone repository `flutter-genui-sdk-firebas
    ```bash
    firebase deploy --only firestore
    ```
-   *(Langkah ini sangat penting agar Firestore Anda memiliki hak akses baca-tulis serta indeks query yang dibutuhkan oleh template).*
+   *(Langkah ini sangat penting agar Firestore Anda memiliki hak akses baca-tulis serta indeks query yang dibutuhkan oleh template. Jika langkah ini belum dikonfigurasi dengan benar, Anda akan menjumpai halaman error Firestore Permission Denied berikut):*
+
+   ![Firestore Permission Denied Error](https://asset.cloudinary.com/amirushared/0d6632fe2051861c61a5e96469bfc6c0)
 
 5. **Jalankan Aplikasi & Seed Data**:
    Jalankan aplikasi (Gunakan **Cold Run/Rebuild penuh** saat pertama kali memasang file config native baru, jangan sekadar Hot Restart):
    ```bash
    flutter run
    ```
+   ![Aplikasi Pertama Kali Berhasil](https://asset.cloudinary.com/amirushared/9192531bbe45e6bab330f2c266b21a9a)
+
    Pada halaman awal aplikasi (Dashboard), jika database Firestore masih kosong, akan muncul tombol **"Seed Generic Mock Data"**. Klik tombol tersebut untuk otomatis mengunggah data dummy contoh ke Firestore database-mu.
+   
+   Setelah tombol ditekan, data dummy akan di-generate ke database Firestore Anda:
+   
+   ![Halaman Firebase Firestore dengan Data](https://asset.cloudinary.com/amirushared/d59a1ab2a19482b5e3460a6eaf26bb16)
 
 ---
 
 ## 🤖 Setup Firebase MCP Server di IDE (Cursor / VS Code / Antigravity)
 
 **Model Context Protocol (MCP)** memungkinkan asisten AI di IDE teman-teman (seperti Cursor atau Google Antigravity) untuk terhubung secara langsung ke database Firebase Firestore milik mereka. Dengan begitu, AI asisten bisa tahu data apa saja yang ada di database, melihat riwayat chat, dan membantu mendebug data Firestore secara real-time.
+
+![Halaman Firebase Console dengan Project Baru](https://asset.cloudinary.com/amirushared/b0ea469c6cf0060a5a629b606148a2ea)
 
 Berikut cara mengaturnya:
 
