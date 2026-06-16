@@ -1,6 +1,8 @@
 # Flutter Generative UI & Firebase Template 🚀
 
-Selamat datang di repository pembelajaran **Flutter Generative UI (GenUI) SDK & Firebase MCP**! Template ini dirancang untuk membantumu memahami bagaimana cara membuat chatbot AI yang tidak hanya menjawab dengan teks biasa, tetapi juga bisa memunculkan UI component interaktif secara dinamis langsung di dalam chat bubble.
+Selamat datang di repository pembelajaran **Flutter Generative UI (GenUI) SDK & Firebase MCP**! Template ini dirancang untuk membantumu memahami bagaimana cara membuat chatbot AI yang tidak hanya menjawab dengan teks biasa, tetapi juga bisa memunculkan UI component secara dinamis langsung di dalam chat bubble.
+
+Project ini bersifat **generik** dan tidak terikat pada satu use case tertentu (seperti e-commerce). Kamu bebas memodifikasi template ini menjadi aplikasi apa saja sesuai kreativitasmu (e.g. Smart Home Control, Travel Guide, Personal Finance Tracker, dll).
 
 ---
 
@@ -40,13 +42,13 @@ Jika teman-temanmu baru saja melakukan clone repository `flutter-genui-sdk-fireb
    ```bash
    flutter run
    ```
-   Pada halaman awal aplikasi (Shop), jika database Firestore masih kosong, akan muncul tombol **"Seed Mock Data to Firestore"**. Klik tombol tersebut untuk otomatis mengunggah data produk contoh ke Firestore database-mu.
+   Pada halaman awal aplikasi (Dashboard), jika database Firestore masih kosong, akan muncul tombol **"Seed Generic Mock Data"**. Klik tombol tersebut untuk otomatis mengunggah data dummy contoh ke Firestore database-mu.
 
 ---
 
 ## 🤖 Setup Firebase MCP Server di IDE (Cursor / VS Code / Antigravity)
 
-**Model Context Protocol (MCP)** memungkinkan asisten AI di IDE teman-temanmu (seperti Cursor atau Google Antigravity) untuk terhubung secara langsung ke database Firebase Firestore milik mereka. Dengan begitu, AI asisten bisa tahu barang apa saja yang ada di inventory, melihat riwayat chat, dan membantu mendebug data Firestore secara real-time.
+**Model Context Protocol (MCP)** memungkinkan asisten AI di IDE teman-temanmu (seperti Cursor atau Google Antigravity) untuk terhubung secara langsung ke database Firebase Firestore milik mereka. Dengan begitu, AI asisten bisa tahu data apa saja yang ada di database, melihat riwayat chat, dan membantu mendebug data Firestore secara real-time.
 
 Berikut cara mengaturnya:
 
@@ -93,8 +95,8 @@ Tambahkan konfigurasi berikut ke file setelan MCP (`claude_desktop_config.json`)
 ```
 
 Setelah terhubung, kamu bisa langsung mengetes AI-mu di chat:
-* *"Coba periksa di Firestore, apa produk dengan ID prod_1 harganya sudah benar?"*
-* *"Tolong buatkan diskon 15% untuk produk 'Modern Minimalist Watch' di database Firestore."*
+* *"Coba periksa di Firestore, ada berapa dokumen di koleksi 'items'?"*
+* *"Tolong tambahkan item baru dengan judul 'Item Eksperimen' ke Firestore."*
 
 ---
 
@@ -104,7 +106,7 @@ Tradisional chatbot hanya menampilkan jawaban berupa teks (Markdown). Dengan **G
 Aplikasi Flutter kita menggunakan paket `genui` untuk:
 * Mendeteksi data JSON yang mengalir dari stream model.
 * Mencocokkan nama komponen dengan **Catalog** yang sudah didaftarkan.
-* Merender component tersebut secara dinamis (misal: widget `ProductCard`, `OrderStatus`, atau `ComparisonTable`) dengan data yang disuplai oleh AI.
+* Merender component tersebut secara dinamis (misal: widget `TextCard`, `ImageCard`, atau `ComparisonTable`) dengan data yang disuplai oleh AI.
 
 ---
 
@@ -112,20 +114,19 @@ Aplikasi Flutter kita menggunakan paket `genui` untuk:
 
 Kamu perlu melengkapi kode di dua file utama:
 
-### Langkah 1: Melengkapi Catalog Widget (`lib/models/help_desk_catalog.dart`)
-Buka file `lib/models/help_desk_catalog.dart`. Daftarkan schema JSON dan builder widget untuk component yang ingin didukung, seperti:
+### Langkah 1: Melengkapi Catalog Widget (`lib/models/custom_catalog.dart`)
+Buka file `lib/models/custom_catalog.dart`. Daftarkan schema JSON dan builder widget untuk component yang ingin didukung, seperti:
 1. **Column**: Untuk menampung beberapa widget sekaligus.
-2. **ProductCard**: Untuk menampilkan info produk (Gambar, Nama, Harga).
-3. **FAQCard**: Expansion tile untuk tanya jawab.
-4. **OrderStatus**: Menampilkan status pengiriman barang.
-5. **PromoCard**: Menampilkan voucher diskon menarik dengan gradient warna.
-6. **ComparisonTable**: Tabel untuk membandingkan spesifikasi beberapa produk.
-7. **SupportContact**: Tombol sekali klik untuk hubungi support.
+2. **TextCard**: Card sederhana untuk info teks.
+3. **ImageCard**: Card dengan gambar, judul, dan caption.
+4. **InteractiveButton**: Tombol yang memicu action/callback.
+5. **ComparisonTable**: Tabel untuk membandingkan baris data.
+6. **StatusIndicator**: Indikator status (misal: sukses, pending, error).
 
 > Kode lengkap referensi implementasi catalog bisa dilihat di file `.cursorrules` atau tanyakan langsung ke asisten AI-mu!
 
-### Langkah 2: Mengintegrasikan GenUI di Chat (`lib/screens/help_desk_screen.dart`)
-Buka file `lib/screens/help_desk_screen.dart` dan lakukan:
+### Langkah 2: Mengintegrasikan GenUI di Chat (`lib/screens/ai_chat_screen.dart`)
+Buka file `lib/screens/ai_chat_screen.dart` dan lakukan:
 1. Import library:
    ```dart
    import 'package:genui/genui.dart';

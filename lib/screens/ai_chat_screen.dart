@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 // TODO 1: Import GenUI and Generative AI packages
 // import 'package:genui/genui.dart';
 // import 'package:google_generative_ai/google_generative_ai.dart' as ai;
-import '../models/product.dart';
+import '../models/database_item.dart';
 import '../firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class HelpDeskScreen extends StatefulWidget {
-  const HelpDeskScreen({super.key});
+class AIChatScreen extends StatefulWidget {
+  const AIChatScreen({super.key});
 
   @override
-  State<HelpDeskScreen> createState() => _HelpDeskScreenState();
+  State<AIChatScreen> createState() => _AIChatScreenState();
 }
 
-class _HelpDeskScreenState extends State<HelpDeskScreen> {
+class _AIChatScreenState extends State<AIChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   
@@ -32,8 +32,8 @@ class _HelpDeskScreenState extends State<HelpDeskScreen> {
   void initState() {
     super.initState();
     
-    // TODO 3: Initialize GenUI SurfaceController and Conversation
-    // TODO 4: Initialize GenerativeModel (gemini-2.5-flash) with system instructions for GenUI protocol rules
+    // TODO 3: Initialize GenUI SurfaceController and Conversation with CustomCatalog
+    // TODO 4: Initialize GenerativeModel (gemini-2.5-flash) with generic system instructions for GenUI
   }
 
   @override
@@ -44,7 +44,7 @@ class _HelpDeskScreenState extends State<HelpDeskScreen> {
     super.dispose();
   }
 
-  // TODO 6: Implement JSON cleaning/filtering logic for streaming responses so JSON isn't rendered as a text bubble
+  // TODO 6: Implement JSON cleaning/filtering logic for streaming responses so JSON isn't rendered as text
   String _cleanResponse(String text) {
     return text.trim();
   }
@@ -62,11 +62,9 @@ class _HelpDeskScreenState extends State<HelpDeskScreen> {
 
     _scrollToBottom();
 
-    // TODO 7: Start chat session and handle streaming response.
-    // Send message to Gemini, clean JSON block from response for text bubbles,
-    // and feed the stream to the transport adapter so GenUI can render components.
+    // TODO 7: Start chat session, handle streaming response, clean JSON, and send chunks to A2uiTransportAdapter
     
-    // Placeholder echo response:
+    // Placeholder response
     await Future.delayed(const Duration(seconds: 1));
     setState(() {
       _messages.add(Message(role: Role.assistant, text: 'You said: "$userMessage". Configure GenUI and Gemini to enable generative widgets!'));
@@ -92,7 +90,7 @@ class _HelpDeskScreenState extends State<HelpDeskScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
-        title: const Text('AI Help Desk', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: const Text('AI Assistant (GenUI)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
@@ -147,7 +145,7 @@ class _HelpDeskScreenState extends State<HelpDeskScreen> {
             child: TextField(
               controller: _textController,
               decoration: InputDecoration(
-                hintText: 'Type your message...',
+                hintText: 'Ask the assistant...',
                 hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(28), borderSide: BorderSide.none),
                 filled: true,

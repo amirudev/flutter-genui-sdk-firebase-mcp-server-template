@@ -5,7 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'screens/home_screen.dart';
-import 'screens/help_desk_screen.dart';
+import 'screens/ai_chat_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,24 +15,24 @@ void main() async {
   await dotenv.load(fileName: ".env");
   runApp(
     const ProviderScope(
-      child: AirbnbShoppingApp(),
+      child: GenericTemplateApp(),
     ),
   );
 }
 
-class AirbnbShoppingApp extends StatelessWidget {
-  const AirbnbShoppingApp({super.key});
+class GenericTemplateApp extends StatelessWidget {
+  const GenericTemplateApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Airbnb Shopping',
+      title: 'GenUI & Firebase Template',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFFF385C),
-          primary: const Color(0xFFFF385C),
+          seedColor: const Color(0xFF1E88E5),
+          primary: const Color(0xFF1E88E5),
           surface: Colors.white,
         ),
         textTheme: GoogleFonts.interTextTheme(),
@@ -55,10 +55,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   static const List<Widget> _screens = [
     HomeScreen(),
-    Center(child: Text('Wishlist')),
-    Center(child: Text('Orders')),
-    HelpDeskScreen(),
-    Center(child: Text('Profile')),
+    AIChatScreen(),
   ];
 
   @override
@@ -69,7 +66,7 @@ class _MainLayoutState extends State<MainLayout> {
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: Colors.grey.withValues(alpha: 0.2),
+              color: Colors.grey.withOpacity(0.2),
               width: 0.5,
             ),
           ),
@@ -79,35 +76,21 @@ class _MainLayoutState extends State<MainLayout> {
           onTap: (index) => setState(() => _selectedIndex = index),
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
-          selectedItemColor: const Color(0xFFFF385C),
+          selectedItemColor: const Color(0xFF1E88E5),
           unselectedItemColor: Colors.grey,
-          selectedFontSize: 10,
-          unselectedFontSize: 10,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
           elevation: 0,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label: 'Shop',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_border),
-              activeIcon: Icon(Icons.favorite),
-              label: 'Wishlists',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_bag_outlined),
-              activeIcon: Icon(Icons.shopping_bag),
-              label: 'Orders',
+              icon: Icon(Icons.dashboard_outlined),
+              activeIcon: Icon(Icons.dashboard),
+              label: 'Dashboard',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.chat_bubble_outline),
               activeIcon: Icon(Icons.chat_bubble),
-              label: 'Help',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
+              label: 'AI Chat',
             ),
           ],
         ),
