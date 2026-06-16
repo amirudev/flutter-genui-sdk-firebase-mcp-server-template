@@ -1,5 +1,7 @@
 {
-  "projects": {},
+  "projects": {
+    "default": "template-trial-ecommerce"
+  },
   "targets": {},
   "etags": {}
 }

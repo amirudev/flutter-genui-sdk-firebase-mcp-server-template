@@ -45,16 +45,34 @@ Jika teman-teman baru saja melakukan clone repository `flutter-genui-sdk-firebas
    FIREBASE_IOS_BUNDLE_ID=your_bundle_id
    ```
 
-3. **Sambungkan Database Firestore & Seed Data**:
+3. **Unduh File Konfigurasi Native Firebase**:
+   Unduh berkas setelan native dari Firebase Console untuk project Anda, lalu salin/gantikan ke direktori berikut:
+   * **Android**: Letakkan `google-services.json` di folder `android/app/google-services.json`
+   * **iOS**: Letakkan `GoogleService-Info.plist` di folder `ios/Runner/GoogleService-Info.plist`
+   * **macOS**: Letakkan `GoogleService-Info.plist` di folder `macos/Runner/GoogleService-Info.plist`
+   
+   *(Catatan: Langkah ini wajib karena Firebase SDK native di Android & iOS membutuhkan file fisik tersebut untuk inisialisasi awal).*
+
+4. **Sambungkan & Deploy Database Firestore**:
    Aplikasi ini memerlukan Firebase Firestore. Pastikan Firebase CLI terinstall di laptop masing-masing (`npm install -g firebase-tools`).
-   Lakukan login:
+   Lakukan login ke Firebase CLI:
    ```bash
    firebase login
    ```
-   *(Pilih project Firebase yang sudah ada, atau buat project baru via Firebase Console. Berkas `lib/firebase_options.dart` bawaan template ini sudah terkonfigurasi secara dinamis untuk membaca data dari file `.env` Anda).*
+   Hubungkan project lokal ini dengan project ID Firebase yang Anda miliki:
+   ```bash
+   firebase use --add
+   ```
+   *(Pilih project ID Firebase Anda saat diminta, lalu beri nama alias **`default`**).*
 
-4. **Jalankan Aplikasi & Seed Data**:
-   Jalankan aplikasi di Emulator/Simulator/Web:
+   Deploy aturan keamanan (rules) & indeks Firestore bawaan template ke project Firebase Anda:
+   ```bash
+   firebase deploy --only firestore
+   ```
+   *(Langkah ini sangat penting agar Firestore Anda memiliki hak akses baca-tulis serta indeks query yang dibutuhkan oleh template).*
+
+5. **Jalankan Aplikasi & Seed Data**:
+   Jalankan aplikasi (Gunakan **Cold Run/Rebuild penuh** saat pertama kali memasang file config native baru, jangan sekadar Hot Restart):
    ```bash
    flutter run
    ```

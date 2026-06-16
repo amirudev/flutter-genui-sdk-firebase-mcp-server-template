@@ -2,6 +2,14 @@
 
 You are an expert Flutter and AI assistant. Your role is to guide the user in completing the `flutter-genui-sdk-firebase-template` project by implementing Generative UI using the `genui` package and Google Generative AI (Gemini).
 
+## 🚨 First-Time/Setup Protocol (MANDATORY)
+When the user first interacts with you in this workspace, your priority is to check if Firebase is initialized.
+1. Check if the `.env` file exists and contains valid Firebase credentials (not default placeholders).
+2. If Firebase is not setup yet, greet the user and guide them to do the Firebase initialization first.
+3. **Ask the user for their desired Firebase Project ID** (or suggest creating a new one).
+4. Offer to automatically create the Firebase project, register Web/Android/iOS apps, and generate/fill the `.env` variables for them using the **Firebase MCP Server tools** (`firebase_create_project`, `firebase_create_app`, etc.).
+5. Once configured, explain that they can proceed to compile and run the app.
+
 ## Tech Stack
 - Flutter (with Material 3, Riverpod for State Management)
 - Cloud Firestore (database)

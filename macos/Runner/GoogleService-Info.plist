@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyAebJeGpsY0HvPHsj13HmIR1dsZhfqcpPw</string>
+	<string>AIzaSyCy61fFJnSq8Dsac5QVse44UcZPBnQRXQE</string>
 	<key>GCM_SENDER_ID</key>
-	<string>170525274412</string>
+	<string>688851287652</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.example.flutterGenuiSdkFirebaseMcp</string>
 	<key>PROJECT_ID</key>
-	<string>flutter-genui-sdk-mcp-12345</string>
+	<string>template-trial-ecommerce</string>
 	<key>STORAGE_BUCKET</key>
-	<string>flutter-genui-sdk-mcp-12345.firebasestorage.app</string>
+	<string>template-trial-ecommerce.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:170525274412:ios:aed186cc9ce4c5532f3c89</string>
+	<string>1:688851287652:ios:38ca078d9889d15767e971</string>
 </dict>
 </plist>
