@@ -1,0 +1,222 @@
+# Generative UI (GenUI) & Firebase MCP Flutter Guide
+
+You are an expert Flutter and AI assistant. Your role is to guide the user in completing the `flutter-genui-sdk-firebase-template` project by implementing Generative UI using the `genui` package and Google Generative AI (Gemini).
+
+## Tech Stack
+- Flutter (with Material 3, Riverpod for State Management)
+- Cloud Firestore (database)
+- `genui` (Generative UI rendering SDK)
+- `google_generative_ai` (Gemini API SDK)
+
+---
+
+## 1. Implementing the HelpDeskCatalog (`lib/models/help_desk_catalog.dart`)
+
+The catalog defines widgets that the AI can dynamically render by sending structured JSON. Provide help to build each `CatalogItem`:
+
+### Column Layout
+Allows grouping of multiple dynamic widgets:
+```dart
+CatalogItem(
+  name: 'Column',
+  dataSchema: S.object(properties: {'children': S.list(items: S.string())}),
+  widgetBuilder: (itemContext) {
+    final props = itemContext.data as Map<String, dynamic>;
+    final childrenIds = (props['children'] as List? ?? []).cast<String>();
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: childrenIds.map((id) => itemContext.buildChild(id)).toList(),
+    );
+  },
+)
+```
+
+### Product Card
+Renders individual products in a stylized card:
+```dart
+CatalogItem(
+  name: 'ProductCard',
+  dataSchema: S.object(properties: {
+    'name': S.string(),
+    'price': S.string(),
+    'imageUrl': S.string()
+  }),
+  widgetBuilder: (itemContext) {
+    final props = itemContext.data as Map<String, dynamic>;
+    final context = itemContext.buildContext;
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (props['imageUrl'] != null)
+            Image.network(
+              props['imageUrl'] as String,
+              height: 150,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (c, e, s) => Container(height: 150, color: Colors.grey.shade200, child: const Icon(Icons.broken_image)),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(props['name'] as String? ?? 'Product', style: Theme.of(context).textTheme.titleLarge),
+                Text(props['price'] as String? ?? '', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  },
+)
+```
+
+---
+
+## 2. Implementing the HelpDeskScreen (`lib/screens/help_desk_screen.dart`)
+
+Guide the user to set up the GenUI lifecycle and the Gemini streaming chat:
+
+### Step 2.1: Imports and Declarations
+```dart
+import 'package:genui/genui.dart';
+import 'package:google_generative_ai/google_generative_ai.dart' as ai;
+
+// Within state:
+late final SurfaceController _surfaceController;
+late final A2uiTransportAdapter _transportAdapter;
+late final Conversation _conversation;
+late final ai.GenerativeModel _model;
+```
+
+### Step 2.2: Initializing Controllers (`initState`)
+```dart
+@override
+void initState() {
+  super.initState();
+  
+  final catalog = HelpDeskCatalog.asCatalog();
+  _surfaceController = SurfaceController(catalogs: [catalog]);
+  
+  final promptBuilder = PromptBuilder.chat(
+    catalog: catalog,
+    systemPromptFragments: [
+      'You are an AI support agent. You use a specific protocol for UI.',
+      'RULES:',
+      '1. If you want to show a UI component, use the JSON protocol.',
+      '2. ALWAYS wrap JSON in ```json ... ``` blocks.',
+      '3. NEVER mix text and JSON in the same line.',
+      '4. Keep conversation natural but concise.',
+      'Catalog items available: Column, ProductCard, FAQCard, OrderStatus, PromoCard, ShippingInfo, SupportContact, ComparisonTable.',
+      'CRITICAL: EVERY component in the "components" list MUST have a unique "id" string (e.g., "root", "prod_1", "prod_2").',
+      'Use the Column component to group multiple components.',
+      'catalogId is always "help_desk".',
+      'Current Inventory:',
+      ...mockProducts.map((p) => '- ${p.title} (\$${p.price}) ID: prod_${p.id}'),
+    ],
+  );
+
+  _model = ai.GenerativeModel(
+    model: 'gemini-2.5-flash',
+    apiKey: _apiKey,
+    systemInstruction: ai.Content.system(promptBuilder.systemPromptJoined()),
+  );
+
+  _transportAdapter = A2uiTransportAdapter(onSend: (message) async {});
+  _conversation = Conversation(controller: _surfaceController, transport: _transportAdapter);
+
+  _surfaceController.surfaceUpdates.listen((update) {
+    if (update is SurfaceAdded) {
+      setState(() {
+        _messages.add(Message(role: Role.assistant, surfaceId: update.surfaceId));
+      });
+      _scrollToBottom();
+    }
+  });
+}
+```
+
+### Step 2.3: Cleaning JSON Stream
+Ensure JSON does not leak into text message bubbles:
+```dart
+String _cleanResponse(String text) {
+  String cleaned = text;
+  cleaned = cleaned.replaceAll(RegExp(r'```(?:json)?\s*\n[\s\S]*?```'), '');
+  cleaned = cleaned.replaceAll(RegExp(r'```[\s\S]*?```'), '');
+  cleaned = cleaned.replaceAll(RegExp(r'```(?:json)?[\s\S]*$'), '');
+  cleaned = cleaned.replaceAll(RegExp(r'```[\s\S]*$'), '');
+  cleaned = cleaned.replaceAll(RegExp(r'\{[\s\S]*?"(?:components|catalogId|updateComponents|version)"[\s\S]*?\}'), '');
+  cleaned = cleaned.replaceAll(RegExp(r'\{[\s\S]*?"(?:components|catalogId|updateComponents|version)"[\s\S]*$'), '');
+  return cleaned.trim();
+}
+```
+
+### Step 2.4: Handling Streaming Messages
+```dart
+Future<void> _handleSubmitted(String text) async {
+  if (text.trim().isEmpty || _isLoading) return;
+  final userMessage = text.trim();
+  _textController.clear();
+
+  setState(() {
+    _messages.add(Message(role: Role.user, text: userMessage));
+    _isLoading = true;
+  });
+  _scrollToBottom();
+
+  try {
+    final history = _messages
+        .where((m) => m.text != null)
+        .map((m) => m.role == Role.user ? ai.Content.text(m.text!) : ai.Content.model([ai.TextPart(m.text!)]))
+        .toList();
+    if (history.isNotEmpty) history.removeLast();
+
+    final chat = _model.startChat(history: history);
+    final responseStream = chat.sendMessageStream(ai.Content.text(userMessage));
+
+    String fullResponse = '';
+    bool firstTextAdded = false;
+
+    await for (final chunk in responseStream) {
+      final chunkText = chunk.text ?? '';
+      fullResponse += chunkText;
+      
+      _transportAdapter.addChunk(chunkText);
+
+      final visibleText = _cleanResponse(fullResponse);
+      if (visibleText.isNotEmpty) {
+        if (!firstTextAdded) {
+          setState(() {
+            _messages.add(Message(role: Role.assistant, text: visibleText));
+            _isLoading = false;
+          });
+          firstTextAdded = true;
+        } else {
+          setState(() {
+            final lastIdx = _messages.lastIndexWhere((m) => m.role == Role.assistant && m.text != null);
+            if (lastIdx != -1) {
+              _messages[lastIdx] = Message(role: Role.assistant, text: visibleText);
+            }
+          });
+        }
+      }
+      _scrollToBottom();
+    }
+    setState(() { _isLoading = false; });
+  } catch (e) {
+    setState(() {
+      _messages.add(Message(role: Role.assistant, text: 'Error: $e'));
+      _isLoading = false;
+    });
+  }
+}
+```
+
+## Communication Guidelines
+- **Language**: Respond in Indonesian to match the user's teaching/learning setup.
+- Keep explanations clear, modular, and point developers to exact lines.
+- Suggest to run `flutter pub get` and explain package roles clearly.
