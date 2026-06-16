@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/database_item.dart';
 import '../services/providers.dart';
@@ -169,6 +170,44 @@ class HomeScreen extends ConsumerWidget {
                           '  }\n'
                           '}',
                           style: TextStyle(fontFamily: 'monospace', fontSize: 14),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          const setupInstructions = '''
+=== FIREBASE SETUP COMMANDS & RULES ===
+
+1. Login to Firebase CLI:
+firebase login
+
+2. Associate workspace with project:
+firebase use --add
+
+3. Deploy Security Rules:
+firebase deploy --only firestore
+
+4. Firestore Security Rules Code:
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+''';
+                          Clipboard.setData(const ClipboardData(text: setupInstructions));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Setup commands & rules copied to clipboard!')),
+                          );
+                        },
+                        icon: const Icon(Icons.copy),
+                        label: const Text('Copy Setup Commands & Rules'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          backgroundColor: Colors.blue.shade50,
+                          foregroundColor: Colors.blue.shade700,
                         ),
                       ),
                       const SizedBox(height: 24),

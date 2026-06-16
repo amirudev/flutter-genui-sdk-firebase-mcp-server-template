@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-// TODO 1: Import GenUI and Generative AI packages
-// import 'package:genui/genui.dart';
-// import 'package:google_generative_ai/google_generative_ai.dart' as ai;
+import 'package:flutter/services.dart';
+import 'package:genui/genui.dart';
+import 'package:google_generative_ai/google_generative_ai.dart' as ai;
 import '../models/database_item.dart';
+import '../models/custom_catalog.dart';
 import '../firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -17,7 +18,10 @@ class _AIChatScreenState extends State<AIChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   
-  // TODO 2: Declare SurfaceController, A2uiTransportAdapter, Conversation, and GenerativeModel
+  late final SurfaceController _surfaceController;
+  late final A2uiTransportAdapter _transportAdapter;
+  late final Conversation _conversation;
+  late final ai.GenerativeModel _model;
   
   final List<Message> _messages = [];
   bool _isLoading = false;
@@ -32,21 +36,65 @@ class _AIChatScreenState extends State<AIChatScreen> {
   void initState() {
     super.initState();
     
-    // TODO 3: Initialize GenUI SurfaceController and Conversation with CustomCatalog
-    // TODO 4: Initialize GenerativeModel (gemini-2.5-flash) with generic system instructions for GenUI
+    final catalog = CustomCatalog.asCatalog();
+    _surfaceController = SurfaceController(catalogs: [catalog]);
+    
+    final promptBuilder = PromptBuilder.chat(
+      catalog: catalog,
+      systemPromptFragments: [
+        'You are an AI assistant. You use a specific protocol for UI rendering.',
+        'RULES:',
+        '1. If you want to show a UI component, use the JSON protocol.',
+        '2. ALWAYS wrap JSON in ```json ... ``` blocks.',
+        '3. NEVER mix text and JSON in the same line.',
+        '4. Keep conversation natural but concise.',
+        'Catalog items available: Column, TextCard, ImageCard, InteractiveButton, ComparisonTable, StatusIndicator.',
+        'CRITICAL: EVERY component in the "components" list MUST have a unique "id" string (e.g., "root", "card_1").',
+        'Use the Column component to group multiple components.',
+        'catalogId is always "custom_catalog".',
+        'Current Database Items:',
+        ...mockItems.map((item) => '- ${item.title}: ${item.description} ID: item_${item.id}'),
+      ],
+    );
+
+    _model = ai.GenerativeModel(
+      model: 'gemini-2.5-flash',
+      apiKey: _apiKey,
+      systemInstruction: ai.Content.system(promptBuilder.systemPromptJoined()),
+    );
+
+    _transportAdapter = A2uiTransportAdapter(onSend: (message) async {});
+    _conversation = Conversation(controller: _surfaceController, transport: _transportAdapter);
+
+    _surfaceController.surfaceUpdates.listen((update) {
+      if (update is SurfaceAdded) {
+        setState(() {
+          _messages.add(Message(role: Role.assistant, surfaceId: update.surfaceId));
+        });
+        _scrollToBottom();
+      }
+    });
   }
 
   @override
   void dispose() {
     _textController.dispose();
     _scrollController.dispose();
-    // TODO 5: Dispose controllers and adapters to prevent memory leaks
+    _surfaceController.dispose();
+    _transportAdapter.dispose();
+    _conversation.dispose();
     super.dispose();
   }
 
-  // TODO 6: Implement JSON cleaning/filtering logic for streaming responses so JSON isn't rendered as text
   String _cleanResponse(String text) {
-    return text.trim();
+    String cleaned = text;
+    cleaned = cleaned.replaceAll(RegExp(r'```(?:json)?\s*\n[\s\S]*?```'), '');
+    cleaned = cleaned.replaceAll(RegExp(r'```[\s\S]*?```'), '');
+    cleaned = cleaned.replaceAll(RegExp(r'```(?:json)?[\s\S]*$'), '');
+    cleaned = cleaned.replaceAll(RegExp(r'```[\s\S]*$'), '');
+    cleaned = cleaned.replaceAll(RegExp(r'\{[\s\S]*?"(?:components|catalogId|updateComponents|version)"[\s\S]*?\}'), '');
+    cleaned = cleaned.replaceAll(RegExp(r'\{[\s\S]*?"(?:components|catalogId|updateComponents|version)"[\s\S]*$'), '');
+    return cleaned.trim();
   }
 
   Future<void> _handleSubmitted(String text) async {
@@ -62,15 +110,56 @@ class _AIChatScreenState extends State<AIChatScreen> {
 
     _scrollToBottom();
 
-    // TODO 7: Start chat session, handle streaming response, clean JSON, and send chunks to A2uiTransportAdapter
-    
-    // Placeholder response
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      _messages.add(Message(role: Role.assistant, text: 'You said: "$userMessage". Configure GenUI and Gemini to enable generative widgets!'));
-      _isLoading = false;
-    });
-    _scrollToBottom();
+    try {
+      final history = _messages
+          .where((m) => m.text != null)
+          .map((m) => m.role == Role.user 
+              ? ai.Content.text(m.text!) 
+              : ai.Content.model([ai.TextPart(m.text!)]))
+          .toList();
+      
+      if (history.isNotEmpty) history.removeLast();
+
+      final chat = _model.startChat(history: history);
+      final responseStream = chat.sendMessageStream(ai.Content.text(userMessage));
+
+      String fullResponse = '';
+      bool firstTextAdded = false;
+
+      await for (final chunk in responseStream) {
+        final chunkText = chunk.text ?? '';
+        fullResponse += chunkText;
+        
+        _transportAdapter.addChunk(chunkText);
+
+        final visibleText = _cleanResponse(fullResponse);
+        if (visibleText.isNotEmpty) {
+          if (!firstTextAdded) {
+            setState(() {
+              _messages.add(Message(role: Role.assistant, text: visibleText, rawContent: fullResponse));
+              _isLoading = false;
+            });
+            firstTextAdded = true;
+          } else {
+            setState(() {
+              final lastIdx = _messages.lastIndexWhere((m) => m.role == Role.assistant && m.text != null);
+              if (lastIdx != -1) {
+                _messages[lastIdx] = Message(role: Role.assistant, text: visibleText, rawContent: fullResponse);
+              }
+            });
+          }
+        }
+        _scrollToBottom();
+      }
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _messages.add(Message(role: Role.assistant, text: 'Error: $e'));
+        _isLoading = false;
+      });
+    }
   }
 
   void _scrollToBottom() {
@@ -112,13 +201,12 @@ class _AIChatScreenState extends State<AIChatScreen> {
               itemBuilder: (context, index) {
                 final message = _messages[index];
                 
-                // TODO 8: Render GenUI Surface widgets if message contains surfaceId
-                // if (message.surfaceId != null) {
-                //   return Padding(
-                //     padding: const EdgeInsets.only(left: 44, bottom: 20, top: 4),
-                //     child: Surface(surfaceContext: _surfaceController.contextFor(message.surfaceId!)),
-                //   );
-                // }
+                if (message.surfaceId != null) {
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 44, bottom: 20, top: 4),
+                    child: Surface(surfaceContext: _surfaceController.contextFor(message.surfaceId!)),
+                  );
+                }
                 
                 return _MessageBubble(message: message);
               },
@@ -179,7 +267,8 @@ class Message {
   final String role;
   final String? text;
   final String? surfaceId;
-  Message({required this.role, this.text, this.surfaceId});
+  final String? rawContent;
+  Message({required this.role, this.text, this.surfaceId, this.rawContent});
 }
 
 class _MessageBubble extends StatelessWidget {
@@ -202,14 +291,38 @@ class _MessageBubble extends StatelessWidget {
               child: CircleAvatar(radius: 16, backgroundColor: Colors.blue.shade50, child: const Icon(Icons.support_agent, color: Colors.blue, size: 16)),
             ),
           Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: isUser ? Colors.blue : Colors.white,
-                borderRadius: BorderRadius.only(topLeft: const Radius.circular(20), topRight: const Radius.circular(20), bottomLeft: Radius.circular(isUser ? 20 : 4), bottomRight: Radius.circular(isUser ? 4 : 20)),
-                boxShadow: [if (!isUser) BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 2))],
-              ),
-              child: Text(message.text!, style: TextStyle(color: isUser ? Colors.white : Colors.black87, fontSize: 15, height: 1.4)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isUser ? Colors.blue : Colors.white,
+                    borderRadius: BorderRadius.only(topLeft: const Radius.circular(20), topRight: const Radius.circular(20), bottomLeft: Radius.circular(isUser ? 20 : 4), bottomRight: Radius.circular(isUser ? 4 : 20)),
+                    boxShadow: [if (!isUser) BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 2))],
+                  ),
+                  child: Text(message.text!, style: TextStyle(color: isUser ? Colors.white : Colors.black87, fontSize: 15, height: 1.4)),
+                ),
+                if (!isUser && message.rawContent != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, left: 4),
+                    child: TextButton.icon(
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: message.rawContent!));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Raw JSON content copied to clipboard!')),
+                        );
+                      },
+                      icon: const Icon(Icons.copy, size: 12),
+                      label: const Text('Copy Raw JSON/Text', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
           if (isUser) const SizedBox(width: 8),
