@@ -6,9 +6,9 @@ Project ini bersifat **generik** dan tidak terikat pada satu use case tertentu (
 
 ---
 
-## 📋 Panduan Setelah Clone (Untuk Teman-Temanmu)
+## 📋 Panduan Setelah Clone (Untuk Teman-Teman)
 
-Jika teman-temanmu baru saja melakukan clone repository `flutter-genui-sdk-firebase-template`, berikut adalah langkah-langkah yang harus mereka lakukan untuk memulai:
+Jika teman-teman baru saja melakukan clone repository `flutter-genui-sdk-firebase-template`, berikut adalah langkah-langkah yang harus mereka lakukan untuk memulai:
 
 ### 1. Setup Environment Aplikasi Flutter
 1. **Instal Dependensi**:
@@ -48,7 +48,7 @@ Jika teman-temanmu baru saja melakukan clone repository `flutter-genui-sdk-fireb
 
 ## 🤖 Setup Firebase MCP Server di IDE (Cursor / VS Code / Antigravity)
 
-**Model Context Protocol (MCP)** memungkinkan asisten AI di IDE teman-temanmu (seperti Cursor atau Google Antigravity) untuk terhubung secara langsung ke database Firebase Firestore milik mereka. Dengan begitu, AI asisten bisa tahu data apa saja yang ada di database, melihat riwayat chat, dan membantu mendebug data Firestore secara real-time.
+**Model Context Protocol (MCP)** memungkinkan asisten AI di IDE teman-teman (seperti Cursor atau Google Antigravity) untuk terhubung secara langsung ke database Firebase Firestore milik mereka. Dengan begitu, AI asisten bisa tahu data apa saja yang ada di database, melihat riwayat chat, dan membantu mendebug data Firestore secara real-time.
 
 Berikut cara mengaturnya:
 
