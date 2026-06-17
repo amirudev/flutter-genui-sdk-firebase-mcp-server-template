@@ -21,48 +21,21 @@ Jika teman-teman baru saja melakukan clone repository `flutter-genui-sdk-firebas
    ```bash
    cp .env.example .env
    ```
-   Buka file `.env` baru tersebut, lalu isi dengan API Key Gemini milikmu (dapatkan di [Google AI Studio](https://aistudio.google.com/)) dan detail project Firebase milikmu (bisa didapatkan di Firebase Console bagian Project Settings):
-   
-   ![Google AI Studio API Key](https://res.cloudinary.com/amirushared/image/upload/v1781619300/Screenshot_2026-06-16_at_19.39.43_mwqatv.png)
-
-   ```env
-   GEMINI_API_KEY=AIzaSy...
-   
-   # Firebase Config (General)
-   FIREBASE_PROJECT_ID=your_project_id
-   FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-   FIREBASE_STORAGE_BUCKET=your_storage_bucket
-   
-   # Firebase Web Config
-   FIREBASE_API_KEY_WEB=your_web_api_key
-   FIREBASE_APP_ID_WEB=your_web_app_id
-   FIREBASE_AUTH_DOMAIN=your_auth_domain
-   
-   # Firebase Android Config
-   FIREBASE_API_KEY_ANDROID=your_android_api_key
-   FIREBASE_APP_ID_ANDROID=your_android_app_id
-   
-   # Firebase iOS Config
-   FIREBASE_API_KEY_IOS=your_ios_api_key
-   FIREBASE_APP_ID_IOS=your_ios_app_id
-   FIREBASE_IOS_BUNDLE_ID=your_bundle_id
-   ```
+   *(Catatan: Anda tidak memerlukan kunci `GEMINI_API_KEY` dari Google AI Studio lagi karena API key sudah aman dikelola melalui Firebase AI Logic).*
 
 3. **Unduh File Konfigurasi Native Firebase**:
    Unduh berkas setelan native dari Firebase Console untuk project Anda, lalu salin/gantikan ke direktori berikut:
    * **Android**: Letakkan `google-services.json` di folder `android/app/google-services.json`
    * **iOS**: Letakkan `GoogleService-Info.plist` di folder `ios/Runner/GoogleService-Info.plist`
    * **macOS**: Letakkan `GoogleService-Info.plist` di folder `macos/Runner/GoogleService-Info.plist`
-   
-   *(Catatan: Langkah ini wajib karena Firebase SDK native di Android & iOS membutuhkan file fisik tersebut untuk inisialisasi awal).*
 
-4. **Sambungkan & Deploy Database Firestore**:
-   Aplikasi ini memerlukan Firebase Firestore. Pastikan Firebase CLI terinstall di laptop masing-masing (`npm install -g firebase-tools`).
+4. **Konfigurasi Firebase & Aktifkan AI Logic**:
+   Aplikasi ini memerlukan Firebase Firestore, Firebase Authentication, dan Firebase AI Logic. Pastikan Firebase CLI terinstall di laptop masing-masing (`npm install -g firebase-tools`).
+   
    Lakukan login ke Firebase CLI:
    ```bash
    firebase login
    ```
-   ![Firebase Login Terminal](https://res.cloudinary.com/amirushared/image/upload/v1781619300/Screenshot_2026-06-16_at_19.39.54_ah2rok.png)
 
    Hubungkan project lokal ini dengan project ID Firebase yang Anda miliki:
    ```bash
@@ -70,6 +43,19 @@ Jika teman-teman baru saja melakukan clone repository `flutter-genui-sdk-firebas
    ```
    *(Pilih project ID Firebase Anda saat diminta, lalu beri nama alias **`default`**).*
 
+   Aktifkan Firebase AI Logic di backend Firebase Anda menggunakan perintah berikut:
+   ```bash
+   npx firebase-tools init ailogic
+   ```
+   *(Pilih platform aplikasi yang sesuai, misalnya Android/iOS/Web, untuk didaftarkan).*
+
+5. **Aktifkan Anonymous Sign-In di Firebase Console**:
+   Agar aplikasi dapat melakukan panggilan AI secara aman tanpa login manual, Anda wajib mengaktifkan login Anonim:
+   * Buka [Firebase Console](https://console.firebase.google.com/).
+   * Masuk ke menu **Build** > **Authentication** > tab **Sign-in method**.
+   * Klik **Add new provider** > Pilih **Anonymous** > Aktifkan toggle **Enable** > Klik **Save**.
+
+6. **Deploy Database Firestore**:
    Deploy aturan keamanan (rules) & indeks Firestore bawaan template ke project Firebase Anda:
    ```bash
    firebase deploy --only firestore
@@ -179,10 +165,18 @@ Buka file `lib/screens/ai_chat_screen.dart` dan lakukan:
 1. Import library:
    ```dart
    import 'package:genui/genui.dart';
-   import 'package:google_generative_ai/google_generative_ai.dart' as ai;
+   import 'package:firebase_ai/firebase_ai.dart' as ai;
+   import 'package:firebase_auth/firebase_auth.dart';
    ```
 2. Inisialisasi **SurfaceController**, **A2uiTransportAdapter**, dan **Conversation**.
-3. Setup **GenerativeModel** dengan API Key Gemini dan berikan system instruction agar model paham kapan harus menggunakan JSON protocol.
+3. Setup **GenerativeModel** menggunakan **FirebaseAI** dengan otentikasi Firebase Auth:
+   ```dart
+   final googleAI = ai.FirebaseAI.googleAI(auth: FirebaseAuth.instance);
+   _model = googleAI.generativeModel(
+     model: 'gemini-2.5-flash',
+     systemInstruction: ai.Content.system(promptBuilder.systemPromptJoined()),
+   );
+   ```
 4. Buat fungsi filtering regex `_cleanResponse` agar string JSON mentah tidak bocor masuk ke gelembung chat teks (text bubble).
 5. Pada ListView builder pesan, tambahkan kondisi untuk merender widget `Surface` jika pesan tersebut memiliki `surfaceId`.
 

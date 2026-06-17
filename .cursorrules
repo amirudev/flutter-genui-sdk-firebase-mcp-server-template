@@ -14,7 +14,8 @@ When the user first interacts with you in this workspace, your priority is to ch
 - Flutter (with Material 3, Riverpod for State Management)
 - Cloud Firestore (database)
 - `genui` (Generative UI rendering SDK)
-- `google_generative_ai` (Gemini API SDK)
+- `firebase_ai` (Firebase AI Logic SDK)
+- `firebase_auth` (Firebase Authentication)
 
 ---
 
@@ -122,7 +123,8 @@ Guide the user to set up the GenUI lifecycle and the Gemini streaming chat:
 ### Step 2.1: Imports and Declarations
 ```dart
 import 'package:genui/genui.dart';
-import 'package:google_generative_ai/google_generative_ai.dart' as ai;
+import 'package:firebase_ai/firebase_ai.dart' as ai;
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Within state:
 late final SurfaceController _surfaceController;
@@ -158,9 +160,9 @@ void initState() {
     ],
   );
 
-  _model = ai.GenerativeModel(
+  final googleAI = ai.FirebaseAI.googleAI(auth: FirebaseAuth.instance);
+  _model = googleAI.generativeModel(
     model: 'gemini-2.5-flash',
-    apiKey: _apiKey,
     systemInstruction: ai.Content.system(promptBuilder.systemPromptJoined()),
   );
 
