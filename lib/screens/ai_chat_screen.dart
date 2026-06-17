@@ -52,7 +52,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
 
     final googleAI = ai.FirebaseAI.googleAI(auth: FirebaseAuth.instance);
     _model = googleAI.generativeModel(
-      model: 'gemini-flash-latest',
+      model: 'gemini-2.5-flash',
       systemInstruction: ai.Content.system(promptBuilder.systemPromptJoined()),
     );
 
