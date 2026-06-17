@@ -1,1 +1,46 @@
-{"firestore":{"database":"(default)","location":"asia-southeast2","rules":"firestore.rules","indexes":"firestore.indexes.json"},"flutter":{"platforms":{"android":{"default":{"projectId":"flutter-genui-sdk-mcp-12345","appId":"1:170525274412:android:02473a3b4da669502f3c89","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"flutter-genui-sdk-mcp-12345","appId":"1:170525274412:ios:aed186cc9ce4c5532f3c89","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"flutter-genui-sdk-mcp-12345","appId":"1:170525274412:ios:aed186cc9ce4c5532f3c89","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"flutter-genui-sdk-mcp-12345","configurations":{"android":"1:170525274412:android:02473a3b4da669502f3c89","ios":"1:170525274412:ios:aed186cc9ce4c5532f3c89","macos":"1:170525274412:ios:aed186cc9ce4c5532f3c89","web":"1:170525274412:web:f4760448064fc43d2f3c89"}}}}}}
+{
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-southeast2",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "flutter-genui-sdk-mcp-12345",
+          "appId": "1:170525274412:android:02473a3b4da669502f3c89",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "flutter-genui-sdk-mcp-12345",
+          "appId": "1:170525274412:ios:aed186cc9ce4c5532f3c89",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "flutter-genui-sdk-mcp-12345",
+          "appId": "1:170525274412:ios:aed186cc9ce4c5532f3c89",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "flutter-genui-sdk-mcp-12345",
+          "configurations": {
+            "android": "1:170525274412:android:02473a3b4da669502f3c89",
+            "ios": "1:170525274412:ios:aed186cc9ce4c5532f3c89",
+            "macos": "1:170525274412:ios:aed186cc9ce4c5532f3c89",
+            "web": "1:170525274412:web:f4760448064fc43d2f3c89"
+          }
+        }
+      }
+    }
+  }
+}

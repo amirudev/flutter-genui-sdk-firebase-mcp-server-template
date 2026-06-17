@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:genui/genui.dart';
-import 'package:google_generative_ai/google_generative_ai.dart' as ai;
+import 'package:firebase_ai/firebase_ai.dart' as ai;
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/database_item.dart';
 import '../models/custom_catalog.dart';
-import '../firebase_options.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});
@@ -25,12 +24,6 @@ class _AIChatScreenState extends State<AIChatScreen> {
   
   final List<Message> _messages = [];
   bool _isLoading = false;
-
-  static String get _envApiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
-  
-  String get _apiKey => _envApiKey.isNotEmpty 
-      ? _envApiKey 
-      : DefaultFirebaseOptions.currentPlatform.apiKey;
 
   @override
   void initState() {
@@ -57,9 +50,9 @@ class _AIChatScreenState extends State<AIChatScreen> {
       ],
     );
 
-    _model = ai.GenerativeModel(
-      model: 'gemini-2.5-flash',
-      apiKey: _apiKey,
+    final googleAI = ai.FirebaseAI.googleAI(auth: FirebaseAuth.instance);
+    _model = googleAI.generativeModel(
+      model: 'gemini-flash-latest',
       systemInstruction: ai.Content.system(promptBuilder.systemPromptJoined()),
     );
 
