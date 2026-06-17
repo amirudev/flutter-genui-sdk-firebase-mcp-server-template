@@ -21,7 +21,7 @@ Jika teman-teman baru saja melakukan clone repository `flutter-genui-sdk-firebas
    ```bash
    cp .env.example .env
    ```
-   *(Catatan: Anda tidak memerlukan kunci `GEMINI_API_KEY` dari Google AI Studio lagi karena API key sudah aman dikelola melalui Firebase AI Logic).*
+   Buka file `.env` baru tersebut, lalu isi dengan detail project Firebase milikmu (bisa didapatkan di Firebase Console bagian Project Settings). Anda **tidak memerlukan** kunci `GEMINI_API_KEY` lagi karena API key sudah aman dikelola melalui Firebase AI Logic di backend.
 
 3. **Unduh File Konfigurasi Native Firebase**:
    Unduh berkas setelan native dari Firebase Console untuk project Anda, lalu salin/gantikan ke direktori berikut:
@@ -54,6 +54,8 @@ Jika teman-teman baru saja melakukan clone repository `flutter-genui-sdk-firebas
    * Buka [Firebase Console](https://console.firebase.google.com/).
    * Masuk ke menu **Build** > **Authentication** > tab **Sign-in method**.
    * Klik **Add new provider** > Pilih **Anonymous** > Aktifkan toggle **Enable** > Klik **Save**.
+   
+   ![Firebase Authentication Anonymous Provider](https://res.cloudinary.com/amirushared/image/upload/v1781711627/Screenshot_2026-06-17_at_22.46.26_wvlyd7.png)
 
 6. **Deploy Database Firestore**:
    Deploy aturan keamanan (rules) & indeks Firestore bawaan template ke project Firebase Anda:
