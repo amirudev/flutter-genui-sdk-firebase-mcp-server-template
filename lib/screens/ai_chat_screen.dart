@@ -41,12 +41,13 @@ class _AIChatScreenState extends State<AIChatScreen> {
         '2. ALWAYS wrap JSON in ```json ... ``` blocks.',
         '3. NEVER mix text and JSON in the same line.',
         '4. Keep conversation natural but concise.',
+        '5. If the user asks for a product, product photo, or recommendations, ALWAYS use the ImageCard component to show the product photo, title, and description.',
         'Catalog items available: Column, TextCard, ImageCard, InteractiveButton, ComparisonTable, StatusIndicator.',
         'CRITICAL: EVERY component in the "components" list MUST have a unique "id" string (e.g., "root", "card_1").',
         'Use the Column component to group multiple components.',
         'catalogId is always "custom_catalog".',
         'Current Database Items:',
-        ...mockItems.map((item) => '- ${item.title}: ${item.description} ID: item_${item.id}'),
+        ...mockItems.map((item) => '- ${item.title}: ${item.description} ID: item_${item.id} Image URL: ${item.imageUrl}'),
       ],
     );
 
